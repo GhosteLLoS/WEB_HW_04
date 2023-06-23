@@ -1,6 +1,7 @@
-from datetime import datetime
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+import datetime
 import json
 import mimetypes
 import pathlib
@@ -31,7 +32,8 @@ class HttpHandler(BaseHTTPRequestHandler):
         print(data)
         data_parse = urllib.parse.unquote_plus(data.decode())
         print(data_parse)
-        data_dict = {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}
+        data_dict = {str(datetime.datetime.now()): {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}}
+
         with open(BASE_DIR.joinpath('storage/data.json'), "w", encoding='utf-8') as j:
             json.dump(data_dict, j, ensure_ascii=False)
         print(data_dict)
