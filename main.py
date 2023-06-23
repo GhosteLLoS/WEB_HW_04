@@ -11,6 +11,7 @@ import urllib.parse
 UDP_IP = '127.0.0.1'
 UDP_PORT = 5000
 JSON = "storage/data.json"
+BASE_DIR = pathlib.Path()
 
 
 class HttpHandler(BaseHTTPRequestHandler):
@@ -31,6 +32,8 @@ class HttpHandler(BaseHTTPRequestHandler):
         data_parse = urllib.parse.unquote_plus(data.decode())
         print(data_parse)
         data_dict = {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}
+        with open(BASE_DIR.joinpath('storage/data.json'), "w", encoding='utf-8') as j:
+            json.dump(data_dict, j, ensure_ascii=False)
         print(data_dict)
         self.send_response(302)
         self.send_header('Location', '/')
@@ -82,12 +85,6 @@ def run_server():
             data_dict = {
                 str(datetime.now()): {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}}
 
-            with open(JSON) as j:
-                data = json.load(j)
-            data.update(data_dict)
-            with open(JSON, "w") as j:
-                json.dump(data, j)
-
     except KeyboardInterrupt:
         print(f'Destroy server')
     finally:
@@ -97,6 +94,12 @@ def run_server():
 if __name__ == '__main__':
     server = threading.Thread(target=run_server)
     client = threading.Thread(target=run_client)
+
+    server.start()
+    client.start()
+    server.join()
+    client.join()
+
 
     server.start()
     client.start()
