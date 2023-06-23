@@ -100,8 +100,3 @@ if __name__ == '__main__':
     server.join()
     client.join()
 
-
-    server.start()
-    client.start()
-    server.join()
-    client.join()
