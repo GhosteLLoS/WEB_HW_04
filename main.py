@@ -1,6 +1,5 @@
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
-
+import os
 import datetime
 import json
 import mimetypes
@@ -32,10 +31,18 @@ class HttpHandler(BaseHTTPRequestHandler):
         print(data)
         data_parse = urllib.parse.unquote_plus(data.decode())
         print(data_parse)
-        data_dict = {str(datetime.datetime.now()): {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}}
-
-        with open(BASE_DIR.joinpath('storage/data.json'), "w", encoding='utf-8') as j:
-            json.dump(data_dict, j, ensure_ascii=False)
+        data_dict = {str(datetime.datetime.now()): {key: value for key, value in
+                                                    [el.split('=') for el in data_parse.split('&')]}}
+        if not os.path.exists('storage'):
+            os.makedirs('storage')  # тут створили директорію якщо не було
+        if not os.path.exists('storage/data.json'):
+            with open('storage/data.json', 'w') as j:
+                json.dump({}, j)  # якщо файлу не було створимо з пустим словником
+        with open('storage/data.json', 'r') as j:
+            data = json.load(j)
+            data.update(data_dict)
+        with open('storage/data.json', "w") as j:
+            json.dump(data, j)  # тут саме словник data треба записувати, тому що ми його прочитали та оновили
         print(data_dict)
         self.send_response(302)
         self.send_header('Location', '/')
@@ -84,8 +91,8 @@ def run_server():
         while True:
             data, address = sock.recvfrom(1024)
             data_parse = urllib.parse.unquote_plus(data.decode())
-            data_dict = {
-                str(datetime.now()): {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}}
+            data_dict = {str(datetime.datetime.now()): {key: value for key, value in
+                                                        [el.split('=') for el in data_parse.split('&')]}}
 
     except KeyboardInterrupt:
         print(f'Destroy server')
